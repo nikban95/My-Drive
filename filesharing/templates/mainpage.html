@@ -1,0 +1,495 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block content %}
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header" style="overflow: hidden; padding-top: 0px;">
+      <span>
+        <h3>
+          {%if currentFolder%}
+            {{currentFolder.name}}
+          {%else%}
+            {{currentpage}}
+          {%endif%}
+        </h3>
+      </span>
+
+      <span>
+        <ol class="breadcrumb" style="margin-bottom: 0px;">
+          <li><a href="{%url 'mainpage'%}"><i class="fa fa-dashboard"></i> Home</a></li>
+          {%if currentFolder%}
+            {%for id, name in path%}
+              <li>
+                <a href="/folder/{{id}}">
+                  {{name}}
+                </a>
+              </li>
+            {%endfor%}
+            <li class="active">{{currentFolder.name}}</li>
+          {%else%}
+            <li class="active">
+              {{currentpage}}
+            </li>
+          {%endif%}
+        </ol>
+      </span>
+    </section>
+    <!-- Main content -->
+    <section class="content">
+      <!-- Your Page Content Here -->
+      <form action="" method="POST">
+        {%csrf_token%}
+        <div class="row">
+          <div class="col-md-12">
+            <div class="box box-primary">
+
+              <div class="box-header with-border">
+                <div class="mailbox-controls" style="overflow: hidden">
+                  {%if permission == 'W' or permission == 'O' or currentpage == "My Files"%}
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#uploadFile" data-backdrop="static">
+                      Upload File
+                    </button>
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#newfolder" data-backdrop="static">
+                      Create Folder
+                    </button>
+                  {%endif%}
+
+                  <div class="pull-right">
+                    {%if currentpage == "Trash"%}
+                      <!-- owner access buttons -->
+                      <div class="btn-group" style="display: none" id="owner-btn-group">
+                        <button class="btn btn-default btn-sm" type="button" onclick="sendDeleteForeverRequest()"><i class="fa fa-trash-o"></i> Delete Forever</button>
+                        <button class="btn btn-default btn-sm" type="button" onclick="sendRestoreRequest()"><i class="fa fa-undo"></i> Restore</button>
+                      </div>
+                      <!-- /owner access buttons -->
+                    {%else%}
+                      <!-- Read access buttons -->
+                      <div class="btn-group" style="display: none" id="read-btn-group">
+                        <button class="btn btn-default btn-sm" type="submit" formaction="{%url 'download'%}"><i class="fa fa-download"></i> Download</button>
+                      </div>
+                      <!-- /read access buttons -->
+                      <!-- write access buttons -->
+                      <div class="btn-group" style="display: none" id="write-btn-group">
+                        <button class="btn btn-default btn-sm" type="button" data-toggle="modal" data-target="#share" data-backdrop="static"><i class="fa fa-share-alt"></i> Share</button>
+                        <button class="btn btn-default btn-sm" type="button" data-toggle="modal" data-target="#updateFile" data-backdrop="static"><i class="fa fa-edit"></i> Update</button>
+                        <button class="btn btn-default btn-sm" type="button" data-toggle="modal" data-target="#chngDesc" data-backdrop="static"><i class="fa fa-th"></i> Description</button>
+                      </div>
+                      <!-- /write access buttons -->
+                      <!-- owner access buttons -->
+                      <div class="btn-group" style="display: none" id="owner-btn-group">
+                        <button class="btn btn-default btn-sm" type="button" data-toggle="modal" data-target="#rename" data-backdrop="static"><i class="fa fa-pencil"></i> Rename</button>
+                        <button id="manageVersions-button" class="btn btn-default btn-sm" type="button" data-toggle="modal" data-target="#manageVersions" data-backdrop="static"><i class="fa fa-history"></i> Versions</button>
+                        <button id="viewPermissions-button" class="btn btn-default btn-sm" type="button" data-toggle="modal" data-target="#viewPermissions" data-backdrop="static"><i class="fa fa-user-o"></i> View Permissions</button>
+                        <button id="delete" class="btn btn-default btn-sm" type="button" onclick="sendDeleteRequest()"><i class="fa fa-trash-o"></i> Delete</button>
+                      </div>
+                      <!-- /owner access buttons -->
+                    {%endif%}
+                    <a class="btn btn-default btn-sm" href=""><i class="fa fa-refresh fa-sp"></i>&nbsp;&nbsp;Refresh</a>
+                  </div>
+                </div>
+              </div><!-- /.box-header -->
+              <div class="box-body no-padding">
+                <div class="table-responsive mailbox-messages">
+                  <table class="table table-hover">
+                    <thead>
+                      <tr>
+                        <th scope="col"></th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Description</th>
+                        <th scope="col">Last Modified</th>
+                        <th scope="col">Size</th>
+                        <th scope="col">Permission</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                        {# for shared by me page folders #}
+                        {%if allFoldersPermObj%}
+                          {%for folderPerm in allFoldersPermObj%}
+                            <tr class="rowfile">
+                              <td style="display: none">
+                                <input type="radio" name="obj" value="folder-{{folderPerm.folder.id}}">
+                              </td>
+                              <td>
+                                <i class="fa fa-folder text-red"></i>
+                              </td>
+                              <td class="mailbox-name text-green">
+                                <a href="/folder/{{folderPerm.folder.id}}">
+                                  {{folderPerm.folder.name}}
+                                </a>
+                              </td>
+                              <td class="mailbox-subject">
+                                {{folderPerm.folder.description}}
+                              </td>
+                              <td class="mailbox-date">
+                                {{folderPerm.folder.lastModified|date:'d/m/Y h:i A'}}
+                              </td>
+                              <td>—</td>
+                              <td id="permission">
+                                {%if folderPerm.permission == "O"%}
+                                Owner
+                                {%endif%}
+                                {%if folderPerm.permission == "R"%}
+                                Read
+                                {%endif%}
+                                {%if folderPerm.permission == "W"%}
+                                Write
+                                {%endif%}
+                              </td>
+                            </tr>
+                          {%endfor%}
+                        {%endif%}
+                        {# / for shared by me page folders#}
+
+                        {# for myFiles and folder page folders#}
+                        {%if allFoldersAndPerm%}
+                          {%for folder, perm in allFoldersAndPerm%}
+                            {%if folder.id == folder.parent_id%}
+                            {# don't display anything #}
+                            {%else%}
+                              {%if perm == "D"%}
+                              {# don't display #}
+                              {%else%}
+                                <tr class="rowfile">
+                                  <td style="display: none">
+                                    <input type="radio" name="obj" value="folder-{{folder.id}}">
+                                  </td>
+                                  <td>
+                                    <i class="fa fa-folder text-red"></i>
+                                  </td>
+                                  <td class="mailbox-name text-green">
+                                    <a href="/folder/{{folder.id}}">
+                                      {{folder.name}}
+                                    </a>
+                                  </td>
+                                  <td class="mailbox-subject">
+                                    {{folder.description}}
+                                  </td>
+                                  <td class="mailbox-date">
+                                    {{folder.lastModified|date:'d/m/Y h:i A'}}
+                                  </td>
+                                  <td>—</td>
+                                  <td id="permission">
+                                    {%if perm == "O"%}
+                                    Owner
+                                    {%endif%}
+                                    {%if perm == "R"%}
+                                    Read
+                                    {%endif%}
+                                    {%if perm == "W"%}
+                                    Write
+                                    {%endif%}
+                                  </td>
+                                </tr>
+                              {%endif%}
+                            {%endif%}
+                          {%endfor%}
+                        {%endif%}
+                        {# /.for myFiles and folder page folders#}
+
+                        {# for shared by me page files #}
+                        {%if allFilesPermObj%}
+                          {%for filePerm in allFilesPermObj%}
+                            <tr class="rowfile">
+                              <td style="display: none">
+                                <input type="radio" name="obj" value="file-{{filePerm.file.id}}">
+                              </td>
+                              <td>
+                                <i class="fa fa-file text-red"></i>
+                              </td>
+                              <td class="mailbox-name text-green">
+                                {{filePerm.file.name}}
+                              </td>
+                              <td class="mailbox-subject">
+                                {{filePerm.file.description}}
+                              </td>
+                              <td class="mailbox-date">
+                                {{filePerm.file.lastModified|date:'d/m/Y h:i A'}}
+                              </td>
+                              <td>
+                                {{filePerm.file.fileDb.size|filesizeformat}}
+                              </td>
+                              <td id="permission">
+                                {%if filePerm.permission == "O"%}
+                                Owner
+                                {%endif%}
+                                {%if filePerm.permission == "R"%}
+                                Read
+                                {%endif%}
+                                {%if filePerm.permission == "W"%}
+                                Write
+                                {%endif%}
+                              </td>
+                            </tr>
+                          {%endfor%}
+                        {%endif%}
+                        {# / for shared by me page files#}                      
+
+                        {# for myFiles and folder page files#}
+                        {%if allFilesAndPerm%}
+                          {%for file, perm in allFilesAndPerm%}
+                            {%if perm == "D"%}
+                            {# don't display #}
+                            {%else%}
+                              <tr class="rowfile">
+                                <td style="display: none">
+                                  <input type="radio" name="obj" value="file-{{file.id}}">
+                                </td>
+                                <td>
+                                  <i class="fa fa-file text-red"></i>
+                                </td>
+                                <td class="mailbox-name text-green">
+                                  {{file.name}}
+                                </td>
+                                <td class="mailbox-subject">
+                                  {{file.description}}
+                                </td>
+                                <td class="mailbox-date">
+                                  {{file.lastModified|date:'d/m/Y h:i A'}}
+                                </td>
+                                <td>
+                                  {{file.fileDb.size|filesizeformat}}
+                                </td>
+                                <td id="permission">
+                                  {%if perm == "O"%}
+                                  Owner
+                                  {%endif%}
+                                  {%if perm == "R"%}
+                                  Read
+                                  {%endif%}
+                                  {%if perm == "W"%}
+                                  Write
+                                  {%endif%}
+                                </td>
+                              </tr>
+                            {%endif%}
+                          {%endfor%}
+                        {%endif%}
+                        {# /.for myFiles and folder page files#}
+                        <tr>
+                          <td colspan="6"><center><b>No more Files and Folders</b></center></td>
+                        </tr>                      
+                    </tbody>
+                  </table><!-- /.table -->
+                </div><!-- /.mail-box-messages -->
+              </div><!-- /.box-body -->
+            </div><!-- /. box -->
+          </div><!-- /.col -->
+        </div><!-- /.row -->
+      </form>        
+    </section><!-- /.content -->
+  </div><!-- /.content-wrapper -->
+
+  <!--Upload Modal -->
+  <div id="uploadFile" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg">
+
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Upload</h4>
+        </div>
+        <div class="modal-body">
+          <div>
+            <form action="/uploadFile/{{currentFolder.id}}" enctype="multipart/form-data" method="POST" class="dropzone" id="upload-dropzone" style="border: 2px #aaa dashed; height:70vh; overflow-y: auto;">
+              {%csrf_token%}
+              <!-- if dropzone failed in some browser-->
+              <div class="fallback">
+                <input name="fileDb" type="file"/>
+                <center><button name="uploadFile" id="submitfile" type="submit" class="btn btn-primary btn-flat">Upload</button></center>
+              </div>
+
+              <!--Message to display-->
+              <div class="col-md-12">
+                <div style="margin: 0px auto; padding-top: 25vh" class="dz-message" data-dz-message>
+                  <h3><i class="fa fa-upload"></i><br>Drop files here or click to upload.</h3>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!--New Folder Modal -->
+  <div id="newfolder" class="modal fade" tabindex="-1" role="dialog" style="padding-top: 13%;">
+    <div class="modal-dialog modal-sm">
+
+      <!-- Modal content-->
+      <div class="modal-content box">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Create Folder</h4>
+        </div>
+        <div class="modal-body">
+          <div>
+            <form id="newfolderForm" action="/createfolder/{{currentFolder.id}}" method="POST">
+              {%csrf_token%}
+              <div class="form-group has-feedback">
+                <input type="text" name="foldername" placeholder="Name" maxlength='30' class='form-control' autocomplete="off">
+               <span class="fa fa-folder form-control-feedback"></span>
+              </div>
+              <div class="text-right">
+                <button type="submit" class="btn btn-primary btn-flat">Create</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!--Rename Modal -->
+  <div id="rename" class="modal fade" tabindex="-1" role="dialog" style="padding-top: 13%;">
+    <div class="modal-dialog modal-sm">
+
+      <!-- Modal content-->
+      <div class="modal-content box">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Rename</h4>
+        </div>
+        <div class="modal-body">
+          <div>
+            <form id="renameForm" action="{%url 'rename'%}" method="POST">
+              {%csrf_token%}
+              <div class="form-group has-feedback">
+                <input type="text" name="newname" placeholder="Name" maxlength='30' class='form-control' autocomplete="off">
+               <span class="fa fa-file-o form-control-feedback"></span>
+              </div>
+              <div class="text-right">
+                <button type="submit" class="btn btn-primary btn-flat">Rename</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!--Change Description Modal -->
+  <div id="chngDesc" class="modal fade" tabindex="-1" role="dialog" style="padding-top: 13%;">
+    <div class="modal-dialog modal-sm">
+
+      <!-- Modal content-->
+      <div class="modal-content box">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Change Description</h4>
+        </div>
+        <div class="modal-body">
+          <div>
+            <form id="chngDescForm" action="{%url 'changeDescription'%}" method="POST">
+              {%csrf_token%}
+              <div class="form-group has-feedback">
+                <textarea name="newdesc" placeholder="Description" cols='50' rows='5' maxlength='450' class='form-control' autocomplete="off"></textarea>
+              </div>
+              <div class="text-right">
+                <button type="submit" class="btn btn-primary btn-flat">Change Description</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!--Share Modal -->
+  <div id="share" class="modal fade" tabindex="-1" role="dialog" style="padding-top: 13%;">
+    <div class="modal-dialog modal-sm">
+
+      <div class="modal-content box">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Share</h4>
+        </div>
+        <div class="modal-body">
+          <div>
+          <!-- class ui-front is added so autocomplete also works in modals-->
+          <form id="shareForm" class="ui-front" action='{%url 'share'%}' method="post">
+            {% csrf_token %}
+
+            {% for field in shareForm %}
+              <div class="form-group">
+                {{field}}
+              </div>
+            {%endfor%}
+            <div class="text-right">
+                <button type="submit" class="btn btn-primary btn-flat">Share</button>
+            </div>
+          </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!--Update Modal -->
+  <div id="updateFile" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg">
+
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Update</h4>
+        </div>
+        <div class="modal-body">
+          <div>
+            <form action="{%url 'update'%}" enctype="multipart/form-data" method="POST" class="dropzone" id="update-dropzone" style="border: 2px #aaa dashed; height:70vh; overflow-y: auto;">
+              {%csrf_token%}
+              <!-- if dropzone failed in some browser-->
+              <div class="fallback">
+                <input name="fileDb" type="file"/>
+                <center><button name="update" id="submitfile" type="submit" class="btn btn-primary btn-flat">Update</button></center>
+              </div>
+
+              <!--Message to display-->
+              <div class="col-md-12">
+                <div style="margin: 0px auto; padding-top: 25vh" class="dz-message" data-dz-message>
+                  <h3><i class="fa fa-upload"></i><br>Drop files here or click to upload.</h3>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Manage Versions Modal -->
+  <div id="manageVersions" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+
+      <!-- Modal content-->
+      <div class="modal-content box">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Manage Versions</h4>
+        </div>
+        <div class="modal-body">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- View Permissions Modal -->
+  <div id="viewPermissions" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+
+      <!-- Modal content-->
+      <div class="modal-content box">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">View Permissions</h4>
+        </div>
+        <div class="modal-body">
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+{% load staticfiles %}
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>My Drive</title>
+    
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <link rel="shortcut icon" href="{% static 'favicon.ico'%}" type="image/x-icon">
+    <link rel="icon" href="{% static 'favicon.ico'%}" type="image/x-icon">
+    
+    <!-- Bootstrap 3.3.5 -->
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css'%}">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="{% static 'font-awesome-4.7.0/css/font-awesome.min.css' %}">
+    
+    <!-- Theme style -->
+    <link rel="stylesheet" href="{% static 'adminLTE/dist/css/AdminLTE.min.css'%}">    
+    <!-- Dropzone file upload -->
+    <link rel="stylesheet" href="{% static 'dropzone/css/dropzone.css' %}">
+    <!-- jquery ui for autocomplete-->
+    <link rel="stylesheet" href="{% static 'jquery-ui-1.11.4/jquery-ui.min.css' %}">    
+    <!-- for tokenfield -->
+    <link rel="stylesheet" href="{% static 'bootstrap-tokenfield/dist/css/bootstrap-tokenfield.min.css' %}">
+    
+    <!-- AdminLTE Skins. We have chosen the skin-red for this starter
+          page. However, you can choose any other skin. Make sure you
+          apply the skin class to the body tag so the changes take effect.
+    -->
+    <link rel="stylesheet" href="{% static 'adminLTE/dist/css/skins/skin-red.min.css'%}">
+  </head>
+  <!--
+  BODY TAG OPTIONS:
+  =================
+  Apply one or more of the following classes to get the
+  desired effect
+  |---------------------------------------------------------|
+  | SKINS         | skin-blue                               |
+  |               | skin-black                              |
+  |               | skin-purple                             |
+  |               | skin-yellow                             |
+  |               | skin-red                                |
+  |               | skin-green                              |
+  |---------------------------------------------------------|
+  |LAYOUT OPTIONS | fixed                                   |
+  |               | layout-boxed                            |
+  |               | layout-top-nav                          |
+  |               | sidebar-collapse                        |
+  |               | sidebar-mini                            |
+  |---------------------------------------------------------|
+  -->
+  <body class="hold-transition skin-red sidebar-mini fixed">
+    <div class="wrapper">
+
+      <!-- Main Header -->
+      <header class="main-header">
+
+        <!-- Logo -->
+        <a href="{%url 'mainpage'%}" class="logo">
+          <!-- mini logo for sidebar mini 50x50 pixels -->
+          <span class="logo-mini"><img src="{% static 'adminLTE/dist/img/MyDriveLogoWhite.png' %}" style="margin-bottom: 8px; width: 42px;"></span>
+          <!-- logo for regular state and mobile devices -->
+          <span class="logo-lg"><img src="{% static 'adminLTE/dist/img/MyDriveLogoWhite.png' %}" style="margin-bottom: 8px; width: 42px;"><b>My</b> Drive</span>
+        </a>
+
+        <!-- Header Navbar -->
+        <nav class="navbar navbar-static-top" role="navigation">
+          <!-- Sidebar toggle button-->
+          <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+            <span class="sr-only">Toggle navigation</span>
+          </a>
+
+          <!-- search form  -->
+          <div class="col-xs-5 col-sm-6 col-md-6" style="padding-top: 0.5em">
+            <form action="{% url 'search' %}" method="get">
+              <div class="input-group">
+                <input type="text" name="q" class="form-control" placeholder="Search Drive..." id="id_filename" style="border: none" autocomplete="off">
+                <span class="input-group-btn">
+                  <button type="button" id="clear-btn" class="btn btn-flat " style="background-color: #fff;"><i class="fa fa-close text-muted"></i></button>
+                  <button type="submit" id="search-btn" class="btn btn-flat"  style="background-color: #fff"><i class="fa fa-search text-red"></i></button>
+                </span>
+              </div>
+            </form>
+          </div>
+          <!-- /.search form -->
+
+          <!-- Navbar Right Menu -->
+          <div class="navbar-custom-menu">
+            <ul class="nav navbar-nav">
+              <!-- Notifications Menu -->
+              <li class="dropdown notifications-menu">
+                <!-- Menu toggle button -->
+                <a href="#" class="dropdown-toggle" id="notification-button" data-toggle="dropdown">
+                  <i class="fa fa-bell-o"></i>
+                    <span class="label label-warning" id="notification-count">{%if notecount%}{{notecount}}{%endif%}</span>
+                </a>
+                <ul class="dropdown-menu">
+                  <li class="header"><center>Notifications</center></li>
+                  <li>
+                    <!-- Inner Menu: contains the notifications -->
+                    <div class="box" id="notificationBox">
+                      <ul class="menu" id="notification">
+                        
+                      </ul>
+                    </div>
+                  </li>
+                  <li class="footer"><a href="{%url 'notification'%}">View all</a></li>
+                </ul>
+              </li>
+              <!-- End notification menu-->
+              
+              <!-- Activities Menu -->
+              <li class="dropdown notifications-menu">
+                <!-- Menu toggle button -->
+                <a href="#" class="dropdown-toggle" id="activity-button" data-toggle="dropdown">
+                  <i class="fa fa-flag-o"></i>
+                </a>
+                <ul class="dropdown-menu">
+                  <li class="header"><center>My Activity</center></li>
+                  <li>
+                    <!-- Inner Menu: contains the notifications -->
+                    <div class="box" id="activityBox">
+                      <ul class="menu" id="activity">
+                      
+                      </ul>
+                    </div>
+                  </li>
+                  <li class="footer"><a href="{%url 'activity'%}">View all</a></li>
+                </ul>
+              </li>
+              <!-- End activities menu-->
+
+              <!-- User Account Menu -->
+              <li class="dropdown user user-menu">
+                <!-- Menu Toggle Button -->
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                  <!-- The user image in the navbar-->
+                  <img src="{% static 'adminLTE/dist/img/avatar6.png' %}" class="user-image" alt="User Image">
+                  <!-- hidden-xs hides the username on small devices so only the image appears. -->
+                  <span class="hidden-xs">{{request.user.username}}</span>
+                </a>
+                <ul class="dropdown-menu">
+                  <!-- The user image in the menu -->
+                  <li class="user-header">
+                    <img src="{% static 'adminLTE/dist/img/avatar6.png' %}" class="img-circle" alt="User Image">
+                    <p>
+                      {{request.user.first_name}} {{request.user.last_name}} - User
+                      <small>Member since {{request.user.date_joined|date:'d/m/Y'}}</small>
+                    </p>
+                  </li>
+                  <!-- Menu Footer-->
+                  <li class="user-footer">
+                    <!-- <div class="pull-left">
+                      <a href="#" class="btn btn-default btn-flat">Profile</a>
+                    </div> -->
+                    <div class="pull-right">
+                      <a href="{%url 'logout'%}" class="btn btn-default btn-flat">Log out</a>
+                    </div>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </nav>
+      </header>
+      <!-- Left side column. contains the logo and sidebar -->
+      <aside class="main-sidebar">
+
+        <!-- sidebar: style can be found in sidebar.less -->
+        <section class="sidebar">
+
+          <!-- Sidebar user panel (optional) -->
+          <div class="user-panel">
+            <div class="pull-left image">
+              <img src="{% static 'adminLTE/dist/img/avatar6.png' %}" class="img-circle" alt="User Image">
+            </div>
+            <div class="pull-left info">
+              <p>{{request.user.first_name}} {{request.user.last_name}}</p>
+              <p>{{request.user.username}}</p>
+            </div>
+          </div>
+
+          <!-- Sidebar Menu -->
+          <ul class="sidebar-menu">
+            <li class="header">
+              My Drive
+            </li>
+            <li {%if currentpage == "My Files"%}class="active"{%endif%}>
+              <a href="{%url 'myFiles'%}">
+                <i class="fa fa-book"></i><span>My Files</span>
+              </a>
+            </li>
+            <li {%if currentpage == "Shared with me"%}class="active"{%endif%}>
+              <a href="{%url 'shared-with-me'%}">
+                <i class="fa fa-group"></i><span>Shared with me</span>
+              </a>
+            </li>
+            <li {%if currentpage == "Trash"%}class="active"{%endif%}>
+              <a href="{%url 'trash'%}">
+                <i class="fa fa-trash"></i> <span>Trash</span>
+              </a>
+            </li>
+            <li {%if currentpage == "My Activity"%}class="active"{%endif%}>
+              <a href="{%url 'activity'%}">
+                <i class="fa fa-flag"></i> <span>My Activity</span>
+              </a>
+            </li>
+            <li {%if currentpage == "Notifications"%}class="active"{%endif%}>
+              <a href="{%url 'notification'%}">
+                <i class="fa fa-bell"></i> <span>Notifications</span>
+              </a>
+            </li>
+          </ul>
+            <!-- /.sidebar-menu -->
+        </section>
+        <!-- /.sidebar -->
+      </aside>
+
+      {% block content %}
+      {% endblock %}
+
+      <!-- Main Footer -->
+      <footer class="main-footer">
+        <!-- Default to the left -->
+      </footer>
+    </div><!-- ./wrapper -->
+
+    <!-- jQuery 2.1.4 -->
+    <script src="{% static 'plugins/jQuery/jQuery-2.1.4.min.js'%}"></script>
+    <!-- Bootstrap 3.3.5 -->
+    <script src="{% static 'bootstrap/js/bootstrap.min.js'%}"></script>
+    <!-- FastClick -->
+    <script src="{% static 'plugins/fastclick/fastclick.js' %}"></script>
+    <!-- Slimscroll -->
+    <script src="{% static 'plugins/slimScroll/jquery.slimscroll.min.js'%}"></script>
+    <!-- AdminLTE App -->
+    <script src="{% static 'adminLTE/dist/js/app.min.js'%}"></script>
+    <!-- dropzone file upload-->
+    <script src="{% static 'dropzone/js/dropzone.js' %}"></script>
+    <!-- notify.js -->
+    <script src="{% static 'drive/js/notify.min.js'%}"></script>
+    <!-- for autocomplete-->
+    <script src="{% static 'jquery-ui-1.11.4/jquery-ui.min.js' %}"></script> 
+    <!-- for tokenfield -->
+    <script src="{% static 'bootstrap-tokenfield/dist/bootstrap-tokenfield.min.js' %}"></script>
+    <!-- dropzone settings -->
+    <script src="{% static 'drive/js/dropzone-file-settings.js'%}"></script>
+    <!-- selection of file in frontend, load notifications, form submits etc. --> 
+    <script src="{% static 'drive/js/homepage.js'%}"></script>
+    
+    <!-- Optionally, you can add Slimscroll and FastClick plugins.
+         Both of these plugins are recommended to enhance the
+         user experience. Slimscroll is required when using the
+         fixed layout. -->
+  </body>
+</html>

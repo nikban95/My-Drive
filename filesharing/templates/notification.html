@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block content %}
+      <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <section class="content-header" style="overflow: hidden; padding-top: 0px">
+          <span>
+            <h3>
+              Notifications
+            </h3>
+          </span>
+
+          <span>
+            <ol class="breadcrumb" style="margin-bottom: 0px;">
+              <li><a href="{%url 'mainpage'%}"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li class="active">Notifications</li> 
+            </ol>
+          </span>
+        </section>
+
+        <!-- Main content -->
+        <section class="content">
+          <!-- Your Page Content Here -->
+          <div class="row">
+            <div class="col-md-1">
+            </div>
+            <div class="col-md-10">
+              <div class="box">
+                
+                  <div class="box-body">
+                    <div class="table-responsive mailbox-messages">
+                      <table class="table table-hover table-striped">
+                        <tbody>
+                          {%for mynotification in notifications%}
+                            {%with notification=mynotification.note%}
+                            <tr class="rowfile">
+                              <td>
+                                <i class="
+              {%if 'share' in notification.verb%} fa fa-users text-blue{%endif%}
+              {%if 'update' in notification.verb%}fa fa-edit text-green{%endif%}
+              {%if 'upload' in notification.verb%}fa fa-upload text-yellow{%endif%}
+              {%if 'download' in notification.verb%}fa fa-download text-green{%endif%}
+              {%if 'delete' in notification.verb%}fa fa-trash text-red{%endif%}
+              {%if 'restore' in notification.verb%}fa fa-undo text-blue{%endif%}
+              {%if 'create' in notification.verb%}fa fa-folder text-yellow{%endif%}
+              {%if 'description' in notification.verb%}fa fa-th text-green{%endif%}
+              {%if 'rename' in notification.verb%}fa fa-pencil text-navy{%endif%}
+              ">
+                                </i>
+                                &nbsp;&nbsp;{{notification.actor.user.username}} has {{notification.verb}} {{notification.objName}} 
+                                {%if notification.actorDest%}
+                                with 
+                                  {%if notification.actorDest.user == request.user%}
+                                  you
+                                  {%else%}
+                                  {{notification.actorDest.user.username}}
+                                  {%endif%}
+                                {%endif%}
+                              </td>
+                              <td align="right">{{notification.time}}</td>
+                            </tr>
+                            {%endwith%}
+                          {%endfor%}
+                          <tr>
+                            <td colspan="2">
+                              <b><center>No more Notifications</center></b>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table><!-- /.table -->
+                    </div><!-- /.mail-box-messages -->
+                  </div><!-- /.box-body -->
+                </form>
+              </div><!-- /. box -->
+            </div><!-- /.col -->
+          </div><!-- /.row -->        
+        </section><!-- /.content -->
+      </div><!-- /.content-wrapper -->
+{% endblock %}

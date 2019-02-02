@@ -1,0 +1,31 @@
+<ul>
+  <li style="border-bottom: 1px solid lightgrey; margin-bottom: 10px; padding-bottom: 10px">
+    <span>{{fileObj.name}}</span>
+    <span style="color: grey">(Current Version)</span>
+    <br>
+    <span><small>{{fileObj.lastModified}}</small></span>
+    <br>
+    <span style="color: grey"><small>{{fileObj.description}}</small></span>
+  </li>
+      
+  {%for v in versions%}
+    <li style="border-bottom: 1px solid lightgrey; margin-bottom: 10px; padding-bottom: 10px">
+      <form action="/version-download/" method="POST">
+        {%csrf_token%}
+        <span >
+          <input style="display: none" type="text" name="versionId" value="{{v.id}}">
+        </span>
+        <span>{{fileObj.name}}</span>
+        <span style="color: grey">(Version {{forloop.revcounter}})</span>
+        <span style="float: right">
+          <button type="submit" class="btn btn-default btn">Download</button>
+          <button type="button" onclick="sendRestoreVersionRequest()" class="btn btn-default btn">Restore</button>
+        </span>
+        <br>
+        <span><small>{{v.lastModified}}</small></span>
+        <br>
+        <span style="color: grey"><small>{{v.description}}</small></span>
+      </form>
+    </li>
+  {%endfor%}
+</ul>

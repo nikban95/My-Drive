@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block content %}
+      <!-- Content Wrapper. Contains page content -->
+      <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <section class="content-header" style="overflow: hidden; padding-top: 0px">
+          <span>
+            <h3>
+              My Activity
+            </h3>
+          </span>
+
+          <span>
+            <ol class="breadcrumb" style="margin-bottom: 0px;">
+              <li><a href="{%url 'mainpage'%}"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li class="active">My Activity</li> 
+            </ol>
+          </span>
+        </section>
+
+        <!-- Main content -->
+        <section class="content">
+          <!-- Your Page Content Here -->
+          <div class="row">
+            <div class="col-md-1">
+            </div>
+            <div class="col-md-10">
+              <div class="box">
+                
+                  <div class="box-body">
+                    <div class="table-responsive mailbox-messages">
+                      <table class="table table-hover table-striped">
+                        <tbody>
+                          {%for activity in activities%}
+                            <tr class="rowfile">
+                              <td>
+                              <i class="
+                  {%if 'share' in activity.verb%} fa fa-users text-blue{%endif%}
+                  {%if 'update' in activity.verb%}fa fa-edit text-green{%endif%}
+                  {%if 'upload' in activity.verb%}fa fa-upload text-yellow{%endif%}
+                  {%if 'download' in activity.verb%}fa fa-download text-green{%endif%}
+                  {%if 'delete' in activity.verb%}fa fa-trash text-red{%endif%}
+                  {%if 'restore' in activity.verb%}fa fa-undo text-blue{%endif%}
+                  {%if 'create' in activity.verb%}fa fa-folder text-yellow{%endif%}
+                  {%if 'description' in activity.verb%}fa fa-th text-green{%endif%}
+                  {%if 'rename' in activity.verb%}fa fa-pencil text-navy{%endif%}
+                  ">
+                                </i> 
+                                &nbsp;&nbsp;You have {{activity.verb}} {{activity.objName}}
+                                {%if activity.actorDest%}
+                                with 
+                                {%if activity.actorDest.user == request.user%}
+                                yourself
+                                {%else%}
+                                {{activity.actorDest.user.username}}
+                                {%endif%}
+                                {%endif%}
+                              </td>
+                              <td align="right">{{activity.time}}</td>
+                            </tr>
+                          {%endfor%}
+                          <tr>
+                            <td colspan="2">
+                              <b><center>No more Activity</center></b>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table><!-- /.table -->
+                    </div><!-- /.mail-box-messages -->
+                  </div><!-- /.box-body -->
+                </form>
+                
+              </div><!-- /. box -->
+            </div><!-- /.col -->
+          </div><!-- /.row -->        
+        </section><!-- /.content -->
+      </div><!-- /.content-wrapper -->
+{% endblock %}

@@ -1,0 +1,28 @@
+{%for activity in activities%}
+  <li><!-- start activity -->
+    <a href="#">
+      <i class="
+        {%if 'share' in activity.verb%} fa fa-users text-blue{%endif%}
+        {%if 'update' in activity.verb%}fa fa-edit text-green{%endif%}
+        {%if 'upload' in activity.verb%}fa fa-upload text-yellow{%endif%}
+        {%if 'download' in activity.verb%}fa fa-download text-green{%endif%}
+        {%if 'delete' in activity.verb%}fa fa-trash text-red{%endif%}
+        {%if 'restore' in activity.verb%}fa fa-undo text-blue{%endif%}
+        {%if 'create' in activity.verb%}fa fa-folder text-yellow{%endif%}
+        {%if 'description' in activity.verb%}fa fa-th text-green{%endif%}
+        {%if 'rename' in activity.verb%}fa fa-pencil text-navy{%endif%}
+        ">
+      </i> 
+      You have {{activity.verb}} {{activity.objName}}
+      {%if activity.actorDest%}
+        with 
+        {%if activity.actorDest.user == request.user%}
+          yourself.
+        {%else%}
+          {{activity.actorDest.user.username}}.
+        {%endif%}
+      {%endif%}<br>
+      <small style="float: right;">{{activity.time}}</small>
+    </a>
+  </li><!-- end activity -->
+{%endfor%}

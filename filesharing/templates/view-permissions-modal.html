@@ -1,0 +1,27 @@
+<ul style="list-style-type: none;">
+  <li style="border-bottom: 1px solid lightgrey; margin-bottom: 10px; padding-bottom: 10px">
+    <i class="fa fa-user-o"></i>
+    &nbsp;&nbsp;&nbsp;
+    <span>{{obj.owner.user.username}}</span>
+    <span style="color: grey"></span>
+    <span style="color: grey; float: right">Owner</span>
+  </li>
+      
+  {%for u in userPermissions%}
+    <li style="border-bottom: 1px solid lightgrey; margin-bottom: 10px; padding-bottom: 10px">
+      <span>{{u.user.username}}</span>
+      <span style="color: grey"></span>
+      <span style="color: grey; float: right">
+        {%if u.permission == 'R'%}
+          Read Access
+        {%endif%}
+        {%if u.permission == 'W'%}
+          Write Access
+        {%endif%}
+        {%if u.permission == 'D'%}
+          Denied Access
+        {%endif%}
+      </span>
+    </li>
+  {%endfor%}
+</ul>
