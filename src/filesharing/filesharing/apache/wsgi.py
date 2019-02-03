@@ -10,7 +10,7 @@ sys.path.append(workspace)
 sys.path.append(project)
 
 # Add the path to 3rd party django application and to django itself.
-sys.path.append('/home/nike/Desktop/bankproject')
+sys.path.append('/home/nike/Desktop/bankproject/src')
 os.environ['DJANGO_SETTINGS_MODULE'] = 'filesharing.apache.override'
 
 from django.core.wsgi import get_wsgi_application
