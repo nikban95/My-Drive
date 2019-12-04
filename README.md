@@ -4,7 +4,7 @@ Store and share your files easily using this platform
 
 #### What this is about?
 - It is a project which allows any firm to have a local google drive like app to use inside the organisation.
-- It can be hosted on the local servers of the organisation and the criical data can be saved and shared.
+- It can be hosted on the local servers of the organisation and the critical data can be saved and shared.
 
 #### Features
 - It is a web based file sharing portal.
